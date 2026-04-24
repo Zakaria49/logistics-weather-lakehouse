@@ -1,0 +1,22 @@
+# -----------------------------
+# 1. Big Data Storage & DBs
+# -----------------------------
+# Never commit your raw or processed data
+datalake/
+# Never commit the database volume
+pgdata/
+
+# -----------------------------
+# 2. Python & Jupyter Artifacts
+# -----------------------------
+.ipynb_checkpoints/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# -----------------------------
+# 3. Environment Variables
+# -----------------------------
+# If you later use a .env file for API keys, ignore it!
+.env

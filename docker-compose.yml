@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  # -------------------------------------------------------------
+  # 1. Spark Processing & Dev Environment (The Engine)
+  # -------------------------------------------------------------
+  pyspark:
+    image: jupyter/pyspark-notebook:latest
+    container_name: lakehouse-spark
+    ports:
+      - "8888:8888" # VS Code Jupyter Connection
+      - "4040:4040" # Spark Web UI
+    volumes:
+      - ./datalake:/home/jovyan/work/datalake # Your Medallion storage
+      - ./jobs:/home/jovyan/work/jobs         # Your Python/Spark scripts
+      - ./dags:/home/jovyan/work/dags         # For future Airflow DAGs
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+      - GRANT_SUDO=yes
+    user: root # Prevents permission denied errors when writing files
+
+  # -------------------------------------------------------------
+  # 2. Analytical Database (Gold Layer Serving)
+  # -------------------------------------------------------------
+  postgres-dwh:
+    image: postgres:15-alpine
+    container_name: lakehouse-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=data_engineer
+      - POSTGRES_PASSWORD=supersecret
+      - POSTGRES_DB=logistics_analytics
+    volumes:
+      - pgdata:/var/lib/postgresql/data # Persists DB data
+
+volumes:
+  pgdata:
