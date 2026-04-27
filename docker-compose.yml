@@ -33,6 +33,21 @@ services:
       - POSTGRES_DB=logistics_analytics
     volumes:
       - pgdata:/var/lib/postgresql/data # Persists DB data
+  
+  # 3. The Silver Layer (Object Storage / "Cloud")
+  lakehouse-minio:
+    image: minio/minio:latest
+    container_name: lakehouse-minio
+    ports:
+      - "9000:9000" # S3 API Port
+      - "9001:9001" # Web UI Port
+    environment:
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: supersecret
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
 
 volumes:
   pgdata:
+  minio_data:

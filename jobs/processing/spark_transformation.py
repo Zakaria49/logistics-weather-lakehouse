@@ -3,14 +3,24 @@ from pyspark.sql.functions import col, to_date, expr, when, round
 import os
 
 def process_silver_layer():
-    print("Initializing Spark Session...")
+    print("Initializing Spark Session with S3/MinIO Configuration...")
+    # Notice the new AWS/S3 configurations added to the builder
     spark = SparkSession.builder \
         .appName("WeatherLogistics-SilverLayer") \
+        .config("spark.hadoop.fs.s3a.endpoint", "http://lakehouse-minio:9000") \
+        .config("spark.hadoop.fs.s3a.access.key", "admin") \
+        .config("spark.hadoop.fs.s3a.secret.key", "supersecret") \
+        .config("spark.hadoop.fs.s3a.path.style.access", "true") \
+        .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem") \
+        .config("spark.hadoop.fs.s3a.connection.ssl.enabled", "false") \
         .getOrCreate()
     
+    # We still read Bronze from the local file system (simulating an external drop zone)
     bronze_logistics = "/home/jovyan/work/datalake/bronze/logistics/logistics_data.csv"
     bronze_weather = "/home/jovyan/work/datalake/bronze/weather/weather_data.csv"
-    silver_output = "/home/jovyan/work/datalake/silver/weather_logistics"
+    
+    # BUT we write Silver to our new S3 Object Storage!
+    silver_output = "s3a://datalake/silver/weather_logistics"
 
     print("Reading Bronze datasets...")
     logistics_df = spark.read.csv(bronze_logistics, header=True, inferSchema=True)

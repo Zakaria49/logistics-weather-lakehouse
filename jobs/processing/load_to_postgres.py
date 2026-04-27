@@ -1,14 +1,19 @@
 from pyspark.sql import SparkSession
 
 def load_to_dwh():
-    print("Initializing Spark Session with PostgreSQL Driver...")
-    # The driver is injected via the spark-submit command
+    print("Initializing Spark Session with S3 and PostgreSQL Drivers...")
     spark = SparkSession.builder \
         .appName("WeatherLogistics-GoldLayer") \
+        .config("spark.hadoop.fs.s3a.endpoint", "http://lakehouse-minio:9000") \
+        .config("spark.hadoop.fs.s3a.access.key", "admin") \
+        .config("spark.hadoop.fs.s3a.secret.key", "supersecret") \
+        .config("spark.hadoop.fs.s3a.path.style.access", "true") \
+        .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem") \
+        .config("spark.hadoop.fs.s3a.connection.ssl.enabled", "false") \
         .getOrCreate()
 
-    # 1. Read the Silver Parquet Data
-    silver_path = "/home/jovyan/work/datalake/silver/weather_logistics"
+    # Read directly from the S3 bucket
+    silver_path = "s3a://datalake/silver/weather_logistics"
     print(f"Reading optimized Parquet data from {silver_path}...")
     df = spark.read.parquet(silver_path)
 
