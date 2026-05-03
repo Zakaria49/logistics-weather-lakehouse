@@ -48,7 +48,7 @@ The optimized pipeline successfully produced a highly predictive metric:
 
 The scatter plot below visually proves the effectiveness of the pipeline. It demonstrates a clear, linear relationship between the engineered Risk Score and real-world supply chain delays, accounting for both predictable bottlenecks and real-world variance (e.g., zero-delay "perfect runs").
 
-![Feature Validation Scatter Plot](./notebooks/scatter_plot.png)
+![Feature Validation Scatter Plot](./notebooks/scatter-plot.png)
 
 ---
 
@@ -57,5 +57,5 @@ The scatter plot below visually proves the effectiveness of the pipeline. It dem
 1. **Clone the repository & start the infrastructure:**
    ```bash
    git clone [(https://github.com/Zakaria49/logistics-weather-lakehouse.git)]
-   cd logistics--weather-lakehouse
+   cd logistics-weather-lakehouse
    docker-compose up -d
