@@ -48,7 +48,7 @@ The optimized pipeline successfully produced a highly predictive metric:
 
 The scatter plot below visually proves the effectiveness of the pipeline. It demonstrates a clear, linear relationship between the engineered Risk Score and real-world supply chain delays, accounting for both predictable bottlenecks and real-world variance (e.g., zero-delay "perfect runs").
 
-![Feature Validation Scatter Plot](C:\Users\Zakaria\Pictures\Screenshots\ploy.png)
+![Feature Validation Scatter Plot](./notebooks/scatter plot.png)
 
 ---
 
