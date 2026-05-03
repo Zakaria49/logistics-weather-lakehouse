@@ -1,4 +1,15 @@
+<div align="center">
 # 🚚 End-to-End Logistics Data Lakehouse & Predictive Analytics Pipeline
+
+[Apache Airflow](https://img.shields.io/badge/Apache_Airflow-017CEE?style=for-the-badge&logo=apache-airflow&logoColor=white)
+![Apache Spark](https://img.shields.io/badge/Apache_Spark-E25A1C?style=for-the-badge&logo=apachespark&logoColor=white)
+[MinIO](https://img.shields.io/badge/MinIO-C72E49?style=for-the-badge&logo=minio&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2CA5E0?style=for-the-badge&logo=docker&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![Jupyter](https://img.shields.io/badge/Jupyter-F37626?style=for-the-badge&logo=jupyter&logoColor=white)
+
+</div>
 
 ## 📖 Overview
 This project is a complete, automated Data Engineering pipeline built to simulate, ingest, process, and analyze logistics supply chain data. It utilizes a **Medallion Architecture** to combine synthetic fleet data with real historical weather data (via Open-Meteo API) to calculate and validate a predictive **Delay Risk Score** for shipping routes in Morocco.
