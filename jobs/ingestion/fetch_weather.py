@@ -1,70 +1,76 @@
-import pandas as pd
 import requests
+import csv
 import os
-import time
+from datetime import datetime
 
-def fetch_weather():
-    coords = {
-        "Casablanca": (33.5731, -7.5898),
-        "Rabat": (34.0209, -6.8416),
-        "Kenitra": (34.2610, -6.5802),
-        "Tangier": (35.7595, -5.8340),
-        "Marrakesh": (31.6295, -7.9811)
-    }
+# Define the Bronze Drop Zone path
+OUTPUT_DIR = "/home/jovyan/work/datalake/bronze/weather"
+OUTPUT_FILE = os.path.join(OUTPUT_DIR, "weather_data.csv")
 
-    all_weather = []
-    # Using early 2026 data to ensure availability
-    start_date = "2026-01-01"
-    end_date = "2026-01-05"
+# Ensure the directory exists
+os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-    print("Connecting to Open-Meteo Historical API...")
+# These must match the Logistics script EXACTLY
+CITIES = {
+    "Casablanca": {"lat": 33.5898, "lon": -7.6038},
+    "Rabat": {"lat": 34.0208, "lon": -6.8416},
+    "Tangier": {"lat": 35.7594, "lon": -5.8339},
+    "Marrakech": {"lat": 31.6294, "lon": -7.9810},
+    "Fes": {"lat": 34.0331, "lon": -5.0002},
+    "Oujda": {"lat": 34.6867, "lon": -1.9113},
+    "Agadir": {"lat": 30.4201, "lon": -9.5981},
+    "Laayoune": {"lat": 27.1252, "lon": -13.1625}
+}
+
+def fetch_weather_data():
+    print("Fetching last 30 days of weather data from Open-Meteo API...")
+    weather_records = []
     
-    for city, (lat, lon) in coords.items():
-        print(f"Fetching data for {city}...")
+    for city, coords in CITIES.items():
+        # Open-Meteo API using past_days=30 to perfectly match the logistics generator
+        url = (f"https://api.open-meteo.com/v1/forecast?"
+               f"latitude={coords['lat']}&longitude={coords['lon']}"
+               f"&past_days=30&forecast_days=1"
+               f"&daily=precipitation_sum,wind_speed_10m_max,temperature_2m_max"
+               f"&timezone=Africa%2FCasablanca")
         
-        # The direct API endpoint requesting daily max temp and total rainfall
-        url = f"https://archive-api.open-meteo.com/v1/archive?latitude={lat}&longitude={lon}&start_date={start_date}&end_date={end_date}&daily=temperature_2m_max,precipitation_sum&timezone=Africa%2FCasablanca"
+        response = requests.get(url)
         
-        try:
-            response = requests.get(url)
+        if response.status_code == 200:
+            data = response.json()
+            daily = data.get("daily", {})
+            dates = daily.get("time", [])
+            precip = daily.get("precipitation_sum", [])
+            wind = daily.get("wind_speed_10m_max", [])
+            temp = daily.get("temperature_2m_max", [])
             
-            # Check if the HTTP request was successful
-            if response.status_code == 200:
-                data = response.json()
-                daily_data = data.get('daily', {})
-                
-                if daily_data:
-                    # Convert the JSON dictionary into a tabular DataFrame
-                    df = pd.DataFrame({
-                        'date': daily_data.get('time', []),
-                        'max_temp_celsius': daily_data.get('temperature_2m_max', []),
-                        'precipitation_mm': daily_data.get('precipitation_sum', []),
-                        'city': city
-                    })
-                    all_weather.append(df)
-                    print(f"  -> Success! Retrieved {len(df)} days of data.")
-                else:
-                    print(f"  -> Warning: No daily data found in JSON payload.")
-            else:
-                print(f"  -> API Error: Status Code {response.status_code}")
-                
-            # Polite 1-second delay so we don't overload the free API
-            time.sleep(1)
-            
-        except Exception as e:
-            print(f"  -> Request failed for {city}: {e}")
+            # Loop through the 30 days of data
+            for i in range(len(dates)):
+                weather_records.append({
+                    "city": city,
+                    "date": dates[i],
+                    "precipitation_mm": precip[i] if precip[i] is not None else 0.0,
+                    "max_wind_kmh": wind[i] if wind[i] is not None else 0.0,
+                    "max_temp_c": temp[i] if temp[i] is not None else 0.0
+                })
+            print(f"✅ Success: Downloaded 30 days of data for {city}")
+        else:
+            print(f"❌ Failed: Could not fetch data for {city}. Status {response.status_code}")
 
-    # Combine and save the data
-    if all_weather:
-        final_df = pd.concat(all_weather, ignore_index=True)
-        output_dir = "/home/jovyan/work/datalake/bronze/weather"
-        os.makedirs(output_dir, exist_ok=True)
+    return weather_records
+
+def save_to_bronze(data):
+    headers = ["city", "date", "precipitation_mm", "max_wind_kmh", "max_temp_c"]
+    
+    print(f"Writing data to {OUTPUT_FILE}...")
+    with open(OUTPUT_FILE, mode='w', newline='', encoding='utf-8') as file:
+        writer = csv.DictWriter(file, fieldnames=headers)
+        writer.writeheader()
+        writer.writerows(data)
         
-        file_path = os.path.join(output_dir, "weather_data.csv")
-        final_df.to_csv(file_path, index=False)
-        print(f"\nPhase 2 Complete! Saved {len(final_df)} total records to {file_path}")
-    else:
-        print("\nError: Failed to fetch any data.")
+    print("Bronze weather ingestion complete!")
 
 if __name__ == "__main__":
-    fetch_weather()
+    weather_dataset = fetch_weather_data()
+    if weather_dataset:
+        save_to_bronze(weather_dataset)
