@@ -18,10 +18,10 @@ This project is a complete, automated Data Engineering pipeline built to simulat
 * **Weather API Fetcher (`fetch_weather.py`):** Automatically pulls the last 30 days of real, historical weather data (Precipitation, Wind, Temp) for 8 Moroccan cities using the Open-Meteo API.
 
 ### 2. Silver Layer (Processing & Feature Engineering)
-* **Spark Transformation (`spark_transformation.py`):** PySpark reads the raw CSVs from MinIO, joins the logistics and weather datasets on `city` and `event_date`, and engineers new features:
+* **Spark Transformation (`spark_transformation.py`):** PySpark reads the raw CSVs from a local shared Docker volume (Bronze Drop Zone), joins the logistics and weather datasets on `city` and `event_date`, and engineers new features:
     * `weather_severity_score` (1-5 based on wind/rain thresholds).
     * `delay_risk_score`: A weighted algorithm designed to predict delivery bottlenecks.
-* Data is written back to the MinIO Data Lake as highly optimized **Parquet** files.
+* The cleansed data is then pushed over the network into the MinIO Data Lake (Silver Layer) as highly optimized **Parquet** files.
 
 ### 3. Gold Layer (Data Warehouse)
 * **Postgres Loader (`load_to_postgres.py`):** Spark reads the cleansed Parquet data and overwrites the `fact_weather_logistics` table in PostgreSQL, making it immediately available for BI tools and Data Science validation.
