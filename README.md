@@ -63,8 +63,17 @@ The scatter plot below visually proves the effectiveness of the pipeline. It dem
 
 ## 🚀 How to Run the Project Locally
 
+### Prerequisites
+* **Docker & Docker Compose** installed on your machine.
+* **Git** to clone the repository.
+  
 1. **Clone the repository & start the infrastructure:**
    ```bash
    git clone [(https://github.com/Zakaria49/logistics-weather-lakehouse.git)]
    cd logistics-weather-lakehouse
    docker-compose up -d
+
+## 👨‍💻 About the Author
+Engineered by Zakaria Master's Degree in Big Data and Cloud Computing
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/zakaria-el-fard-292709237/) 
+[![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Zakaria49)
