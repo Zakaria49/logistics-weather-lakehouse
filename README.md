@@ -13,15 +13,19 @@ This project is a complete, automated Data Engineering pipeline built to simulat
 
 ## 🏗️ Architecture & Pipeline Flow
 
+### 0. Orchestration Layer (Apache Airflow)
+* **The Brain of the Operation:** The entire pipeline is scheduled and monitored by **Apache Airflow**. A custom DAG (`logistics_lakehouse_pipeline`) dictates the strict execution dependencies (Ingestion ➔ Spark Processing ➔ Data Warehouse Load), ensuring no downstream task runs until the upstream data is securely in the Data Lake.
+  
 ### 1. Bronze Layer (Raw Data Ingestion)
 * **Logistics Generator (`generate_logistics.py`):** A custom Python script that generates synthetic trucking data, injecting mathematical delay correlations based on the geographical difficulty of Moroccan routes (e.g., Tangier to Agadir).
 * **Weather API Fetcher (`fetch_weather.py`):** Automatically pulls the last 30 days of real, historical weather data (Precipitation, Wind, Temp) for 8 Moroccan cities using the Open-Meteo API.
+* **The Drop Zone:** For this local containerized deployment, the raw CSVs are ingested into a **local shared Docker volume**. This acts as our initial landing zone, bridging the local compute environment with the processing engine.
 
 ### 2. Silver Layer (Processing & Feature Engineering)
 * **Spark Transformation (`spark_transformation.py`):** PySpark reads the raw CSVs from a local shared Docker volume (Bronze Drop Zone), joins the logistics and weather datasets on `city` and `event_date`, and engineers new features:
     * `weather_severity_score` (1-5 based on wind/rain thresholds).
     * `delay_risk_score`: A weighted algorithm designed to predict delivery bottlenecks.
-* The cleansed data is then pushed over the network into the MinIO Data Lake (Silver Layer) as highly optimized **Parquet** files.
+* **The Data Lake (MinIO):** Once transformed, PySpark pushes the cleansed data over the network into **MinIO**, an S3-compatible cloud object storage system. By storing the Silver layer as optimized **Parquet** files in MinIO, the architecture successfully decouples compute from storage, mirroring an enterprise AWS S3 environment.
 
 ### 3. Gold Layer (Data Warehouse)
 * **Postgres Loader (`load_to_postgres.py`):** Spark reads the cleansed Parquet data and overwrites the `fact_weather_logistics` table in PostgreSQL, making it immediately available for BI tools and Data Science validation.
