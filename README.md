@@ -10,7 +10,10 @@
 
 
 ## 📖 Overview
-This project is a complete, automated Data Engineering pipeline built to simulate, ingest, process, and analyze logistics supply chain data. It utilizes a **Medallion Architecture** to combine synthetic fleet data with real historical weather data (via Open-Meteo API) to calculate and validate a predictive **Delay Risk Score** for shipping routes in Morocco.
+This project is an end-to-end data engineering system designed to analyze how weather conditions impact logistics performance.
+
+It integrates real weather data with simulated logistics operations to build a decision-support system capable of identifying high-risk deliveries before they occur.
+The system follows a modern **Medallion Architecture (Bronze → Silver → Gold)** and includes ingestion, distributed processing, feature engineering, validation, and orchestration.
 
 ## 🛠️ Tech Stack
 * **Orchestration:** Apache Airflow
